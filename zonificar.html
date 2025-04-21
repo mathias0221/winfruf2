@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zonificar Excel - Enrutador</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #3f51b5;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            max-width: 800px;
+        }
+        .back-button {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: 2px solid white;
+            border-radius: 4px;
+            background-color: transparent;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        .back-button:hover {
+            background-color: white;
+            color: #3f51b5;
+        }
+        h1 {
+            color: white;
+            font-size: 2rem;
+            margin: 0;
+            text-align: center;
+            flex-grow: 1;
+        }
+        .main-container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            width: 100%;
+        }
+        .action-button {
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border: 2px solid white;
+            border-radius: 4px;
+            background-color: transparent;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        .action-button:hover {
+            background-color: white;
+            color: #3f51b5;
+        }
+        .file-input {
+            display: none;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .data-table th {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+        .data-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .no-data {
+            text-align: center;
+            padding: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        .list-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .list-checkbox {
+            margin-right: 0.5rem;
+        }
+        .saved-list-card {
+            background: rgba(30,40,70,0.8);
+            border-radius: 12px;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+            padding: 1rem;
+        }
+        .saved-list-header {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .saved-list-header:hover {
+            text-decoration: underline;
+        }
+        .saved-list-icon {
+            margin-right: 0.7rem;
+            color: #90caf9;
+            font-size: 1.4rem;
+        }
+        .saved-list-count {
+            color: #b0bec5;
+            font-size: 0.95rem;
+            margin-left: 0.7rem;
+        }
+        .saved-list-table {
+            margin-top: 0.7rem;
+            display: none;
+        }
+        .delete-list-btn {
+            background: transparent;
+            border: none;
+            color: #ef5350;
+            margin-left: auto;
+            font-size: 1.3rem;
+            cursor: pointer;
+        }
+        #qrSection {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+        }
+        #qrSection .back-button {
+            margin: 20px 0 10px 0;
+        }
+        #qrSection h2 {
+            color: white;
+            text-align: center;
+        }
+        #qrSection .video-container {
+            background: #222;
+            border-radius: 8px;
+        }
+        #qrSection video {
+            width: 100%;
+            border-radius: 8px;
+        }
+        #qrSection canvas {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #qrSection .controls {
+            margin-top: 10px;
+        }
+        #qrSection button {
+            margin: 5px;
+        }
+        #qrSection #resultadoQR {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            font-size: 18px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #222;
+        }
+        #qrSection #zonaQR {
+            margin-top: 10px;
+            padding: 10px;
+            background: #3f51b5;
+            border-radius: 8px;
+            color: white;
+            font-size: 20px;
+            display: none;
+        }
+        #qrSection .mensaje-error {
+            display: none;
+            color: red;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <button class="back-button" onclick="goBack()">Volver</button>
+        <h1>Zonificar Excel</h1>
+    </div>
+    <button id="btnCamara" class="action-button" style="margin-bottom:20px;">
+        <span style="font-size:1.3em;">&#128247;</span> Cámara
+    </button>
+    <div id="qrSection" style="display:none; width:100%; max-width:800px; margin:auto;">
+        <button onclick="cerrarQRSection()" class="back-button" style="margin: 20px 0 10px 0;">Volver</button>
+        <h2 style="color:white; text-align:center;">Lector de Códigos QR</h2>
+        <div class="video-container" style="background:#222; border-radius:8px;">
+            <video id="videoQR" autoplay playsinline style="width:100%;border-radius:8px;"></video>
+            <canvas id="canvasQR" style="position:absolute;left:0;top:0;width:100%;height:100%;"></canvas>
+        </div>
+        <div class="controls">
+            <button id="iniciarCamaraQR">Abrir Cámara</button>
+            <button id="detenerCamaraQR" disabled>Cerrar Cámara</button>
+            <button id="cambiarCamaraQR" disabled>Cambiar Cámara</button>
+        </div>
+        <div id="resultadoQR" style="margin-top:20px; padding:15px; background:white; border-radius:8px; font-size:18px; min-height:60px; display:flex; align-items:center; justify-content:center; color:#222;"></div>
+        <div id="zonaQR" style="margin-top:10px; padding:10px; background:#3f51b5; border-radius:8px; color:white; font-size:20px; display:none;"></div>
+        <div id="mensajeErrorQR" class="mensaje-error"></div>
+    </div>
+    <div class="main-container">
+        <div class="action-buttons">
+            <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls" onchange="handleFileSelect(event)">
+            <button class="action-button" onclick="document.getElementById('fileInput').click()">
+                Seleccionar Excel
+            </button>
+            <button class="action-button" onclick="deleteSelectedLists()">
+                Eliminar Lista
+            </button>
+        </div>
+        <div id="dataContainer"></div>
+        <div id="savedListsContainer"></div>
+    </div>
+    <script>
+        let excelData = [];
+        let processedData = [];
+        let originalFile = null;
+        let savedLists = [];
+        
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+        
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            originalFile = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    excelData = XLSX.utils.sheet_to_json(firstSheet);
+                    processExcelData();
+                    saveCurrentList();
+                    displayProcessedData();
+                    displaySavedLists();
+                } catch (error) {
+                    alert('Error al procesar el archivo Excel.');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        function loadRoutes() {
+            const routesJson = localStorage.getItem('routes');
+            return routesJson ? JSON.parse(routesJson) : [];
+        }
+        function processExcelData() {
+            const routes = loadRoutes();
+            processedData = excelData.map(row => {
+                const codigo = row.Receipt ? String(row.Receipt).trim() : '';
+                let nombre = '';
+                let zona = 'sin zona';
+                if (row.Consignee) {
+                    const lines = String(row.Consignee).split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+                    if (lines.length > 0) {
+                        const firstLine = lines[0];
+                        const bracketIndex = firstLine.indexOf('[');
+                        nombre = bracketIndex !== -1 ? firstLine.substring(0, bracketIndex).trim() : firstLine.trim();
+                        const resto = lines.slice(1).join(', ');
+                        const palabrasExcel = resto.split(',').map(p => p.trim().toLowerCase()).filter(p => p.length > 0);
+                        let mejorZona = '';
+                        let maxCoincidencias = 0;
+                        let palabraOtros = '';
+                        if (routes && routes.length > 0) {
+                            routes.forEach(route => {
+                                if (typeof route === 'object' && route.content) {
+                                    const palabrasCarpeta = route.content.split(',').map(p => p.trim().toLowerCase()).filter(p => p.length > 0);
+                                    let coincidencias = 0;
+                                    let palabraCoincidente = '';
+                                    palabrasExcel.forEach(palabraExcel => {
+                                        if (palabrasCarpeta.includes(palabraExcel)) {
+                                            coincidencias++;
+                                            if (route.name.toLowerCase() === 'otros') {
+                                                palabraCoincidente = palabraExcel;
+                                            }
+                                        }
+                                    });
+                                    if (route.name.toLowerCase() === 'otros' && coincidencias > 0) {
+                                        palabraOtros = palabraCoincidente;
+                                    }
+                                    if (coincidencias > maxCoincidencias && route.name.toLowerCase() !== 'otros') {
+                                        maxCoincidencias = coincidencias;
+                                        mejorZona = route.name;
+                                    }
+                                }
+                            });
+                            if (palabraOtros) {
+                                zona = palabraOtros;
+                            } else if (maxCoincidencias > 0) {
+                                zona = mejorZona;
+                            }
+                        }
+                    }
+                }
+                return { codigo, nombre, zona };
+            });
+        }
+        function saveCurrentList() {
+            if (!processedData || processedData.length === 0) return;
+            let lists = JSON.parse(localStorage.getItem('zonifiedLists') || '[]');
+            const fecha = new Date();
+            const nombreLista = originalFile ? originalFile.name.replace(/\.[^/.]+$/, '') : 'Lista_' + fecha.getTime();
+            lists.push({
+                name: nombreLista + ' - ' + fecha.toLocaleString(),
+                data: JSON.parse(JSON.stringify(processedData))
+            });
+            localStorage.setItem('zonifiedLists', JSON.stringify(lists));
+        }
+        function displayProcessedData() {
+            const container = document.getElementById('dataContainer');
+            if (!processedData || processedData.length === 0) {
+                container.innerHTML = '<div class="no-data">No hay datos para mostrar</div>';
+                return;
+            }
+            let html = `<div class="list-title">Lista actual</div><table class="data-table"><thead><tr><th>Código</th><th>Nombre</th><th>Zona</th></tr></thead><tbody>`;
+            processedData.forEach(item => {
+                html += `<tr><td>${item.codigo || ''}</td><td>${item.nombre || ''}</td><td>${item.zona || 'sin zona'}</td></tr>`;
+            });
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+        function displaySavedLists() {
+            const container = document.getElementById('savedListsContainer');
+            let lists = JSON.parse(localStorage.getItem('zonifiedLists') || '[]');
+            savedLists = lists;
+            if (!lists || lists.length === 0) {
+                container.innerHTML = '<div class="no-data">No hay listas zonificadas guardadas</div>';
+                return;
+            }
+            let html = '<div class="list-title">Listas Zonificadas Guardadas</div>';
+            lists.forEach((list, idx) => {
+                html += `<div class="saved-list-card">
+                    <div class="saved-list-header" onclick="toggleListTable(${idx})">
+                        <span class="saved-list-icon">&#128194;</span>
+                        <span>${list.name}</span>
+                        <span class="saved-list-count">(${list.data.length} registros)</span>
+                        <button class="delete-list-btn" onclick="event.stopPropagation();deleteSingleList(${idx})" title="Eliminar esta lista">&#128465;</button>
+                    </div>
+                    <div class="saved-list-table" id="list-table-${idx}">
+                        <table class="data-table">
+                            <thead><tr><th>Código</th><th>Nombre</th><th>Zona</th></tr></thead>
+                            <tbody>`;
+                list.data.forEach(item => {
+                    html += `<tr><td>${item.codigo || ''}</td><td>${item.nombre || ''}</td><td>${item.zona || 'sin zona'}</td></tr>`;
+                });
+                html += `</tbody></table></div></div>`;
+            });
+            container.innerHTML = html;
+        }
+        function toggleListTable(idx) {
+            const tableDiv = document.getElementById('list-table-' + idx);
+            if (tableDiv) {
+                tableDiv.style.display = tableDiv.style.display === 'block' ? 'none' : 'block';
+            }
+        }
+        function deleteSingleList(idx) {
+            let lists = JSON.parse(localStorage.getItem('zonifiedLists') || '[]');
+            lists.splice(idx, 1);
+            localStorage.setItem('zonifiedLists', JSON.stringify(lists));
+            displaySavedLists();
+        }
+        // Mostrar listas guardadas al cargar la página
+        window.onload = function() {
+            displaySavedLists();
+        };
+        
+        // --- QR SECTION LOGIC ---
+        const qrSection = document.getElementById('qrSection');
+        const btnCamara = document.getElementById('btnCamara');
+        const videoQR = document.getElementById('videoQR');
+        const canvasQR = document.getElementById('canvasQR');
+        const ctxQR = canvasQR.getContext('2d');
+        const resultadoQR = document.getElementById('resultadoQR');
+        const zonaQR = document.getElementById('zonaQR');
+        const mensajeErrorQR = document.getElementById('mensajeErrorQR');
+        const btnIniciarQR = document.getElementById('iniciarCamaraQR');
+        const btnDetenerQR = document.getElementById('detenerCamaraQR');
+        const btnCambiarQR = document.getElementById('cambiarCamaraQR');
+        let streamQR = null;
+        let procesandoQR = false;
+        let camaraActualQR = 'environment';
+        let ultimoQRDetectado = '';
+        btnCamara.onclick = function() {
+            qrSection.style.display = 'block';
+            document.querySelector('.main-container').style.display = 'none';
+        };
+        function cerrarQRSection() {
+            qrSection.style.display = 'none';
+            document.querySelector('.main-container').style.display = '';
+            detenerCamaraQR();
+            resultadoQR.textContent = 'Esperando código QR...';
+            zonaQR.style.display = 'none';
+        }
+        function mostrarErrorQR(mensaje) {
+            mensajeErrorQR.textContent = mensaje;
+            mensajeErrorQR.style.display = 'block';
+            setTimeout(() => { mensajeErrorQR.style.display = 'none'; }, 5000);
+        }
+        async function iniciarCamaraQR() {
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: camaraActualQR,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                };
+                streamQR = await navigator.mediaDevices.getUserMedia(constraints);
+                videoQR.srcObject = streamQR;
+                btnIniciarQR.disabled = true;
+                btnDetenerQR.disabled = false;
+                btnCambiarQR.disabled = false;
+                videoQR.onloadedmetadata = () => {
+                    canvasQR.width = videoQR.videoWidth;
+                    canvasQR.height = videoQR.videoHeight;
+                    detectarQRLoop();
+                };
+                mensajeErrorQR.style.display = 'none';
+            } catch (error) {
+                mostrarErrorQR('No se pudo acceder a la cámara: ' + error.message);
+            }
+        }
+        function detenerCamaraQR() {
+            if (streamQR) {
+                streamQR.getTracks().forEach(track => track.stop());
+                videoQR.srcObject = null;
+                ctxQR.clearRect(0, 0, canvasQR.width, canvasQR.height);
+                btnIniciarQR.disabled = false;
+                btnDetenerQR.disabled = true;
+                btnCambiarQR.disabled = true;
+                ultimoQRDetectado = '';
+            }
+        }
+        async function cambiarCamaraQR() {
+            camaraActualQR = camaraActualQR === 'environment' ? 'user' : 'environment';
+            detenerCamaraQR();
+            await iniciarCamaraQR();
+        }
+        function detectarQRLoop() {
+            if (!streamQR || procesandoQR) {
+                requestAnimationFrame(detectarQRLoop);
+                return;
+            }
+            procesandoQR = true;
+            try {
+                ctxQR.drawImage(videoQR, 0, 0, canvasQR.width, canvasQR.height);
+                const imageData = ctxQR.getImageData(0, 0, canvasQR.width, canvasQR.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {inversionAttempts: 'dontInvert'});
+                if (code) {
+                    if (code.data !== ultimoQRDetectado) {
+                        ultimoQRDetectado = code.data;
+                        resultadoQR.textContent = code.data;
+                        // Extraer código antes del primer guion
+                        const codigoDetectado = code.data.split('-')[0].trim();
+                        // Buscar en todas las listas zonificadas
+                        let zonaEncontrada = '';
+                        let encontrado = false;
+                        let listas = JSON.parse(localStorage.getItem('zonifiedLists') || '[]');
+                        for(const lista of listas) {
+                            const item = lista.data.find(row => String(row.codigo) === codigoDetectado);
+                            if(item) {
+                                zonaEncontrada = item.zona || '';
+                                encontrado = true;
+                                break;
+                            }
+                        }
+                        zonaQR.style.display = 'block';
+                        zonaQR.textContent = encontrado ? `Zona: ${zonaEncontrada}` : 'Código no encontrado en listas zonificadas';
+                    }
+                }
+                procesandoQR = false;
+                requestAnimationFrame(detectarQRLoop);
+            } catch (error) {
+                procesandoQR = false;
+                requestAnimationFrame(detectarQRLoop);
+            }
+        }
+        btnIniciarQR.addEventListener('click', iniciarCamaraQR);
+        btnDetenerQR.addEventListener('click', detenerCamaraQR);
+        btnCambiarQR.addEventListener('click', cambiarCamaraQR);
+        // --- FIN QR SECTION LOGIC ---
+    </script>
+</body>
+</html>
